@@ -17,27 +17,28 @@ namespace TransactionRunner.UseCases.DailyTransactions
 
         public bool ProcessTransactions(string inputBalanceFile, string inputTransactionsFile, string outputBalanceFile, string declinedTransactionFile)
         {
-            // Implement the logic to process daily transactions here
             Console.WriteLine($"Processing transactions from {inputTransactionsFile} based on balances in {inputBalanceFile} and saving results to {outputBalanceFile}");
 
             var incomingBalances = balanceRepository.Read(inputBalanceFile);
-
             var transactions = transactionRepository.Read(inputTransactionsFile);
-
-            // sanity check balances
-
-            var groupedBalances = incomingBalances.GroupBy(x => x.AccountId);
-            // 123
-            if (groupedBalances.Any(x => x.Count() != 1))
-            {
-                throw new InvalidOperationException("Each account should have exactly one balance record.");
-            }
-            // "123", [{"123",1000.00}]
-            var balanceDictionary = groupedBalances.ToDictionary(x => x.Key, x => x.Single());
             var declinedTransactions = new List<TransactionRecord>();
+
+            var balanceDictionary = GetGroupedBalances(incomingBalances);
 
             foreach (var transaction in transactions)
             {
+                if (!balanceDictionary.ContainsKey(transaction.From))
+                {
+                    Console.WriteLine($"Skipping transaction from {transaction.From} to {transaction.To} for amount {transaction.Amount} due to unknown FROM account.");
+                    declinedTransactions.Add(transaction);
+                    continue;
+                }
+                if (!balanceDictionary.ContainsKey(transaction.To))
+                {
+                    Console.WriteLine($"Skipping transaction from {transaction.From} to {transaction.To} for amount {transaction.Amount} due to unknown TO account.");
+                    declinedTransactions.Add(transaction);
+                    continue;
+                }
                 var from = balanceDictionary[transaction.From];
                 var to = balanceDictionary[transaction.To];
                 if (IsValidTransaction(from, to, transaction.Amount))
@@ -66,9 +67,20 @@ namespace TransactionRunner.UseCases.DailyTransactions
             }
         }
 
+        private static Dictionary<long, BalanceRecord> GetGroupedBalances(List<BalanceRecord> incomingBalances)
+        {
+            var groupedBalances = incomingBalances.GroupBy(x => x.AccountId);
+            if (groupedBalances.Any(x => x.Count() != 1))
+            {
+                throw new InvalidOperationException("Each account should have exactly one balance record.");
+            }
+            var balanceDictionary = groupedBalances.ToDictionary(x => x.Key, x => x.Single());
+            return balanceDictionary;
+        }
+
         private bool IsValidTransaction(BalanceRecord from, BalanceRecord to, decimal amount)
         {
-            return from.AccountBalance >= amount;
+            return from.AccountBalance >= amount && amount > 0;
         }
 
         private void ApplyTransaction(BalanceRecord from, BalanceRecord to, decimal amount)

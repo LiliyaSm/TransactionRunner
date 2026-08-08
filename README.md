@@ -37,3 +37,9 @@ Or you can specify the file locations by calling "TransactionRunner.exe process 
 ## Processing Result
 Transaction runner will read the balance file and transaction file, process the transactions and output the resulting balance to the output file. If any transactions are declined, they will be written to the declined file and no resulting balance will be generated.
 
+## Todo
+
+- Better logging
+- Better exception handling (cover Repos, Controller, UseCase with proper error handling, add custom errors)
+- Add tests for Controller and UseCase
+

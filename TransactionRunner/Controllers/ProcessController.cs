@@ -3,6 +3,16 @@ using TransactionRunner.UseCases.DailyTransactions;
 
 namespace TransactionRunner.Controllers
 {
+    public enum ProcessResult
+    {
+        Success = 0,
+        InputBalanceFileNotFound = 1,
+        InputTransactionsFileNotFound = 2,
+        OutputBalanceFileNotSpecified = 3,
+        DeclinedTransactionsFileNotSpecified = 4,
+        ProcessingFailed = 5
+    }
+
     internal class ProcessController
     {
         private const string DefaultRootFolder = "_task";
@@ -42,25 +52,30 @@ namespace TransactionRunner.Controllers
 
         public readonly Command Command = new("process", "Process daily transactions");
 
-        public int Execute(ParseResult parseResult)
+        /// <summary>
+        /// Executes the process of handling daily transactions based on the provided command-line arguments.
+        /// </summary>
+        /// <param name="parseResult">CLI arguments parse result</param>
+        /// <returns>Success if processed, otherwise an error code</returns>
+        public ProcessResult Execute(ParseResult parseResult)
         {
             var inputBalanceFile = parseResult.GetValue(InputBalanceArg);
             if (inputBalanceFile == null || !inputBalanceFile.Exists)
             {
                 Console.WriteLine($"Input balance file '{inputBalanceFile?.FullName}' does not exist.");
-                return 1;
+                return ProcessResult.InputBalanceFileNotFound;
             }
             var inputTransactionsFile = parseResult.GetValue(InputTransactionArg);
             if (inputTransactionsFile == null || !inputTransactionsFile.Exists)
             {
                 Console.WriteLine($"Input transactions file '{inputTransactionsFile?.FullName}' does not exist.");
-                return 2;
+                return ProcessResult.InputTransactionsFileNotFound;
             }
             var outputBalanceFile = parseResult.GetValue(OutputBalanceArg);
             if (outputBalanceFile == null)
             {
                 Console.WriteLine("Output balance file is not specified.");
-                return 3;
+                return ProcessResult.OutputBalanceFileNotSpecified;
             }
             if (outputBalanceFile.Exists)
             {
@@ -71,15 +86,15 @@ namespace TransactionRunner.Controllers
             if (declinedTransactionsFile == null)
             {
                 Console.WriteLine("Declined transactions file is not specified.");
-                return 4;
-            }
+                return ProcessResult.DeclinedTransactionsFileNotSpecified;
+            }   
             if (declinedTransactionsFile.Exists)
             {
                 declinedTransactionsFile.Delete();
             }
 
             var result = processor.ProcessTransactions(inputBalanceFile.FullName, inputTransactionsFile.FullName, outputBalanceFile.FullName, declinedTransactionsFile.FullName);
-            return result ? 0 : 5;
+            return result ? ProcessResult.Success : ProcessResult.ProcessingFailed;
         }
     }
 }
