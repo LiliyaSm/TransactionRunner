@@ -78,7 +78,7 @@ namespace TransactionRunner.Controllers
                 declinedTransactionsFile.Delete();
             }
 
-            var result = processor.ProcessTransactions(inputBalanceFile, inputTransactionsFile, outputBalanceFile, declinedTransactionsFile);
+            var result = processor.ProcessTransactions(inputBalanceFile.FullName, inputTransactionsFile.FullName, outputBalanceFile.FullName, declinedTransactionsFile.FullName);
             return result ? 0 : 5;
         }
     }

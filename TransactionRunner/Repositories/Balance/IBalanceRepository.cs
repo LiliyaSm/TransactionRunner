@@ -1,8 +1,10 @@
-﻿namespace TransactionRunner.Repositories.Balance
+﻿using Microsoft.Extensions.FileProviders;
+
+namespace TransactionRunner.Repositories.Balance
 {
     public interface IBalanceRepository
     {
-        List<BalanceRecord> Read(FileInfo file);
-        void Write(FileInfo file, IEnumerable<BalanceRecord> balances);
+        List<BalanceRecord> Read(string file);
+        void Write(string file, IEnumerable<BalanceRecord> balances);
     }
 }

@@ -1,7 +1,9 @@
-﻿namespace TransactionRunner.UseCases.DailyTransactions
+﻿using Microsoft.Extensions.FileProviders;
+
+namespace TransactionRunner.UseCases.DailyTransactions
 {
     public interface IDailyTransactionsUseCase
     {
-        bool ProcessTransactions(FileInfo inputBalanceFile, FileInfo inputTransactionsFile, FileInfo outputBalanceFile, FileInfo declinedTransactionFile);
+        bool ProcessTransactions(string inputBalanceFile, string inputTransactionsFile, string outputBalanceFile, string declinedTransactionFile);
     }
 }

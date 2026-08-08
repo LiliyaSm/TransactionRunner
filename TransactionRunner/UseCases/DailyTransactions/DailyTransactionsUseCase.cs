@@ -4,18 +4,18 @@ using TransactionRunner.Repositories.Transaction;
 namespace TransactionRunner.UseCases.DailyTransactions
 {
 
-    internal class DailyTransactionsUseCase : IDailyTransactionsUseCase
+    public class DailyTransactionsUseCase : IDailyTransactionsUseCase
     {
         private readonly IBalanceRepository balanceRepository;
         private readonly ITransactionRepository transactionRepository;
 
         public DailyTransactionsUseCase(IBalanceRepository balanceRepository, ITransactionRepository transactionRepository)
         {
-            this.balanceRepository = (BalanceRepository)balanceRepository;
-            this.transactionRepository = (TransactionRepository)transactionRepository;
+            this.balanceRepository = balanceRepository;
+            this.transactionRepository = transactionRepository;
         }
 
-        public bool ProcessTransactions(FileInfo inputBalanceFile, FileInfo inputTransactionsFile, FileInfo outputBalanceFile, FileInfo declinedTransactionFile)
+        public bool ProcessTransactions(string inputBalanceFile, string inputTransactionsFile, string outputBalanceFile, string declinedTransactionFile)
         {
             // Implement the logic to process daily transactions here
             Console.WriteLine($"Processing transactions from {inputTransactionsFile} based on balances in {inputBalanceFile} and saving results to {outputBalanceFile}");

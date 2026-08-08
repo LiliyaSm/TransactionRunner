@@ -7,13 +7,13 @@ namespace TransactionRunner.Repositories.Balance
 
     internal class BalanceRepository : IBalanceRepository
     {
-        public List<BalanceRecord> Read(FileInfo file)
+        public List<BalanceRecord> Read(string file)
         {
             var config = new CsvConfiguration(CultureInfo.InvariantCulture)
             {
                 HasHeaderRecord = false,
             };
-            using (var reader = new StreamReader(file.FullName))
+            using (var reader = new StreamReader(file))
             using (var csv = new CsvReader(reader, config))
             {
                 var records = csv.GetRecords<BalanceRecord>();
@@ -21,13 +21,13 @@ namespace TransactionRunner.Repositories.Balance
             }
         }
 
-        public void Write(FileInfo file, IEnumerable<BalanceRecord> balances)
+        public void Write(string file, IEnumerable<BalanceRecord> balances)
         {
             var config = new CsvConfiguration(CultureInfo.InvariantCulture)
             {
                 HasHeaderRecord = false,
             };
-            using (var writer = new StreamWriter(file.FullName))
+            using (var writer = new StreamWriter(file))
             using (var csv = new CsvWriter(writer, config))
             {
                 csv.WriteRecords(balances);
