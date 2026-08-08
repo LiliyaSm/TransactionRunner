@@ -1,18 +1,11 @@
 ﻿using CsvHelper;
 using CsvHelper.Configuration;
-using CsvHelper.Configuration.Attributes;
 using System.Globalization;
 
-namespace TransactionRunner.Repository
+namespace TransactionRunner.Repositories.Balance
 {
-    public class BalanceRecord
-    {
-        [Index(0)]
-        public long AccountId { get; set; }
-        [Index(1)]
-        public decimal AccountBalance { get; set; }
-    }
-    internal class BalanceRepository
+
+    internal class BalanceRepository : IBalanceRepository
     {
         public List<BalanceRecord> Read(FileInfo file)
         {

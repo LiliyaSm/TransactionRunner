@@ -1,20 +1,11 @@
 ﻿using CsvHelper;
 using CsvHelper.Configuration;
-using CsvHelper.Configuration.Attributes;
 using System.Globalization;
 
-namespace TransactionRunner.Repository
+namespace TransactionRunner.Repositories.Transaction
 {
-    public class TransactionRecord
-    {
-        [Index(0)]
-        public long From { get; set; }
-        [Index(1)]
-        public long To { get; set; }
-        [Index(2)]
-        public decimal Amount { get; set; }
-    }
-    public class TransactionRepository
+
+    public class TransactionRepository : ITransactionRepository
     {
         public List<TransactionRecord> Read(FileInfo file)
         {

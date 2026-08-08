@@ -1,11 +1,19 @@
-﻿using TransactionRunner.Repository;
+﻿using TransactionRunner.Repositories.Balance;
+using TransactionRunner.Repositories.Transaction;
 
-namespace TransactionRunner.UseCase
+namespace TransactionRunner.UseCases.DailyTransactions
 {
-    internal class DailyTransactions
+
+    internal class DailyTransactionsUseCase : IDailyTransactionsUseCase
     {
-        private BalanceRepository balanceRepository = new();
-        private TransactionRepository transactionRepository = new();
+        private readonly IBalanceRepository balanceRepository;
+        private readonly ITransactionRepository transactionRepository;
+
+        public DailyTransactionsUseCase(IBalanceRepository balanceRepository, ITransactionRepository transactionRepository)
+        {
+            this.balanceRepository = (BalanceRepository)balanceRepository;
+            this.transactionRepository = (TransactionRepository)transactionRepository;
+        }
 
         public bool ProcessTransactions(FileInfo inputBalanceFile, FileInfo inputTransactionsFile, FileInfo outputBalanceFile, FileInfo declinedTransactionFile)
         {
