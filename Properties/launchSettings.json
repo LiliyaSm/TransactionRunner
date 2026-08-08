@@ -1,0 +1,9 @@
+{
+  "profiles": {
+    "TransactionRunner": {
+      "commandName": "Project",
+      "commandLineArgs": "process",
+      "workingDirectory": "."
+    }
+  }
+}
