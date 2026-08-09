@@ -48,14 +48,14 @@ namespace TransactionRunner.UseCases.DailyTransactions
                 }
                 else
                 {
-                    Console.WriteLine($"Skipping transaction from {transaction.From} to {transaction.To} for amount {transaction.Amount} due to insufficient funds.");
+                    Console.WriteLine($"Skipping transaction from {transaction.From} to {transaction.To} for amount {transaction.Amount} due to invalid amount or insufficient balance.");
                     declinedTransactions.Add(transaction);
                 }
             }
 
             if (declinedTransactions.Any())
             {
-                Console.WriteLine("Some transactions were declined due to insufficient funds, Output balance won't be generated. Writing declined transactions to file.");
+                Console.WriteLine("Some transactions were declined. Output balance won't be generated. Writing declined transactions to file.");
                 transactionRepository.Write(declinedTransactionFile, declinedTransactions);
                 return false;
             }
