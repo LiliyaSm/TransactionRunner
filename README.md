@@ -6,9 +6,10 @@ A .NET CLI application that reads two CSV files — account balances and transac
 
 ### Architecture
 
+- **Domain** (`BalanceRecord`, `TransactionRecord`) — account/transaction models with validation, status, and transfer logic.
 - **Controller** (`ProcessController`) — parses CLI arguments, validates that input files exist, and delegates to the use case.
-- **Use Case** (`DailyTransactionsUseCase`) — applies business rules and orchestrates reading/writing via repositories.
-- **Repositories** (`BalanceRepository`, `TransactionRepository`) — read and write headerless CSV files using CsvHelper.
+- **Use Case** (`DailyTransactionsUseCase`) — orchestrates reading/writing via repositories.
+- **Repositories** (`BalanceRepository`, `TransactionRepository`) — CSV I/O via CsvHelper `ClassMap`s (`BalanceRecordMap`, `TransactionRecordMap`).
 
 ### Dependencies
 
@@ -21,6 +22,7 @@ A .NET CLI application that reads two CSV files — account balances and transac
 ### Validation
 
 - Input files must exist (checked by the controller before processing).
+- Account IDs must be 16-digit numbers.
 - Each account ID must appear exactly once in the balance file.
 - Transaction amount must be greater than zero.
 - The sender account must have a balance ≥ the transaction amount.
@@ -120,9 +122,9 @@ Files have **no header row**. Columns are positional.
 | 1 | `decimal` | Account balance |
 
 ```
-1001,5000.00
-1002,250.50
-1003,0.00
+1000000000001001,5000.00
+1000000000001002,250.50
+1000000000001003,0.00
 ```
 
 ### transactions.csv / declined_transactions.csv
@@ -134,8 +136,8 @@ Files have **no header row**. Columns are positional.
 | 2 | `decimal` | Amount |
 
 ```
-1001,1002,200.00
-1002,1003,50.50
+1000000000001001,1000000000001002,200.00
+1000000000001002,1000000000001003,50.50
 ```
 ---
 

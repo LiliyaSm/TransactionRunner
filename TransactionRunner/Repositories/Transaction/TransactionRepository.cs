@@ -1,7 +1,7 @@
 ﻿using CsvHelper;
 using CsvHelper.Configuration;
-using Microsoft.Extensions.FileProviders;
 using System.Globalization;
+using TransactionRunner.Domain;
 
 namespace TransactionRunner.Repositories.Transaction
 {
@@ -17,8 +17,8 @@ namespace TransactionRunner.Repositories.Transaction
             using (var reader = new StreamReader(file))
             using (var csv = new CsvReader(reader, config))
             {
-                var records = csv.GetRecords<TransactionRecord>();
-                return records.ToList();
+                csv.Context.RegisterClassMap<TransactionRecordMap>();
+                return csv.GetRecords<TransactionRecord>().ToList();
             }
         }
 
@@ -31,6 +31,7 @@ namespace TransactionRunner.Repositories.Transaction
             using (var writer = new StreamWriter(file))
             using (var csv = new CsvWriter(writer, config))
             {
+                csv.Context.RegisterClassMap<TransactionRecordMap>();
                 csv.WriteRecords(transactions);
             }
         }

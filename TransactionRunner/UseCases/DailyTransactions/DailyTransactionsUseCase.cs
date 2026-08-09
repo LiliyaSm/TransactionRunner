@@ -1,4 +1,5 @@
-﻿using TransactionRunner.Repositories.Balance;
+﻿using TransactionRunner.Domain;
+using TransactionRunner.Repositories.Balance;
 using TransactionRunner.Repositories.Transaction;
 
 namespace TransactionRunner.UseCases.DailyTransactions
@@ -21,7 +22,6 @@ namespace TransactionRunner.UseCases.DailyTransactions
 
             var incomingBalances = balanceRepository.Read(inputBalanceFile);
             var transactions = transactionRepository.Read(inputTransactionsFile);
-            var declinedTransactions = new List<TransactionRecord>();
 
             var balanceDictionary = GetGroupedBalances(incomingBalances);
 
@@ -30,29 +30,32 @@ namespace TransactionRunner.UseCases.DailyTransactions
                 if (!balanceDictionary.ContainsKey(transaction.From))
                 {
                     Console.WriteLine($"Skipping transaction from {transaction.From} to {transaction.To} for amount {transaction.Amount} due to unknown FROM account.");
-                    declinedTransactions.Add(transaction);
+                    transaction.Decline();
                     continue;
                 }
                 if (!balanceDictionary.ContainsKey(transaction.To))
                 {
                     Console.WriteLine($"Skipping transaction from {transaction.From} to {transaction.To} for amount {transaction.Amount} due to unknown TO account.");
-                    declinedTransactions.Add(transaction);
+                    transaction.Decline();
                     continue;
                 }
                 var from = balanceDictionary[transaction.From];
                 var to = balanceDictionary[transaction.To];
-                if (IsValidTransaction(from, to, transaction.Amount))
+                if (transaction.HasValidAmount() && from.CanDebit(transaction.Amount))
                 {
                     Console.WriteLine($"Processing transaction from {transaction.From} to {transaction.To} for amount {transaction.Amount}");
-                    ApplyTransaction(from, to, transaction.Amount);
+                    from.Debit(transaction.Amount);
+                    to.Credit(transaction.Amount);
+                    transaction.Accept();
                 }
                 else
                 {
                     Console.WriteLine($"Skipping transaction from {transaction.From} to {transaction.To} for amount {transaction.Amount} due to invalid amount or insufficient balance.");
-                    declinedTransactions.Add(transaction);
+                    transaction.Decline();
                 }
             }
 
+            var declinedTransactions = transactions.Where(t => t.IsDeclined).ToList();
             if (declinedTransactions.Any())
             {
                 Console.WriteLine("Some transactions were declined. Output balance won't be generated. Writing declined transactions to file.");
@@ -69,24 +72,16 @@ namespace TransactionRunner.UseCases.DailyTransactions
 
         private static Dictionary<long, BalanceRecord> GetGroupedBalances(List<BalanceRecord> incomingBalances)
         {
+            if (incomingBalances.Any(x => !x.HasValidAccountId()))
+            {
+                throw new InvalidOperationException("Account IDs must be 16-digit numbers.");
+            }
             var groupedBalances = incomingBalances.GroupBy(x => x.AccountId);
             if (groupedBalances.Any(x => x.Count() != 1))
             {
                 throw new InvalidOperationException("Each account should have exactly one balance record.");
             }
-            var balanceDictionary = groupedBalances.ToDictionary(x => x.Key, x => x.Single());
-            return balanceDictionary;
-        }
-
-        private bool IsValidTransaction(BalanceRecord from, BalanceRecord to, decimal amount)
-        {
-            return from.AccountBalance >= amount && amount > 0;
-        }
-
-        private void ApplyTransaction(BalanceRecord from, BalanceRecord to, decimal amount)
-        {
-            from.AccountBalance -= amount;
-            to.AccountBalance += amount;
+            return groupedBalances.ToDictionary(x => x.Key, x => x.Single());
         }
     }
 }
