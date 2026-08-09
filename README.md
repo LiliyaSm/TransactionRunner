@@ -137,9 +137,6 @@ Files have **no header row**. Columns are positional.
 1001,1002,200.00
 1002,1003,50.50
 ```
-
-See the [`examples/`](examples/) folder for ready-to-use sample files.
-
 ---
 
 ## Processing Result
